@@ -3,10 +3,6 @@
 
   inputs =
     {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-      home-manager.url = "github:nix-community/home-manager/master";
-      home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
       nixos.url = "nixpkgs/nixos-unstable";
       latest.url = "nixpkgs";
       digga.url = "github:divnix/digga";
@@ -27,33 +23,11 @@
       pkgs.inputs.nixpkgs.follows = "nixos";
     };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, pkgs, digga, nixos, ci-agent, home, nixos-hardware, nur, ... }:
+  outputs = inputs@{ self, pkgs, digga, nixos, ci-agent, home, nixos-hardware, nur, ... }:
     digga.lib.mkFlake {
       inherit self inputs;
 
       channelsConfig = { allowUnfree = true; };
-
-      nixosConfigurations.myhost = inputs.nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      # Things in this set are passed to modules and accessible
-      # in the top-level arguments (e.g. `{ pkgs, lib, inputs, ... }:`).
-      specialArgs = {
-        inherit inputs;
-      };
-      modules = [
-        inputs.home-manager.nixosModules.home-manager
-
-        ({ pkgs, ... }: {
-          nix.extraOptions = "experimental-features = nix-command flakes";
-          nix.package = pkgs.nixFlakes;
-          nix.registry.nixpkgs.flake = inputs.nixpkgs;
-
-          home-manager.useGlobalPkgs = true;
-        })
-
-        ./configuration.nix
-        ];
-      };
 
       channels = {
         nixos = {
@@ -118,5 +92,6 @@
       templates.flk.path = ./.;
       templates.flk.description = "flk template";
 
-    };
+    }
+  ;
 }
